@@ -14,7 +14,16 @@ export default class PipelineConstruct extends Construct {
     const blueprint = blueprints.EksBlueprint.builder()
     .account(account)
     .region(region)
-    .addOns()
+    .addOns( 
+      new blueprints.CalicoAddOn,
+      new blueprints.KedaAddOn,
+      new blueprints.CalicoAddOn,
+      new blueprints.MetricsServerAddOn,
+      new blueprints.ClusterAutoScalerAddOn,
+      new blueprints.ContainerInsightsAddOn,
+      new blueprints.AwsLoadBalancerControllerAddOn(),
+      new blueprints.XrayAddOn()
+    )
     .teams(new TeamPlatform(account), new TeamApplication('backend',account));
   
     blueprints.CodePipelineStack.builder()
