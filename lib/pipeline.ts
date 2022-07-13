@@ -10,20 +10,21 @@ export default class PipelineConstruct extends Construct {
 
     const account = props?.env?.account!;
     const region = props?.env?.region!;
+    const addOns: Array<blueprints.ClusterAddOn> = [
+        new blueprints.CalicoOperatorAddOn(),
+        new blueprints.MetricsServerAddOn(),
+        new blueprints.ContainerInsightsAddOn(),
+        new blueprints.AwsLoadBalancerControllerAddOn(),
+        new blueprints.SecretsStoreAddOn(),
+        new blueprints.KedaAddOn(),
+        new blueprints.XrayAddOn(),
+        new blueprints.AwsForFluentBitAddOn(),
 
+    ];
     const blueprint = blueprints.EksBlueprint.builder()
     .account(account)
     .region(region)
-    .addOns(
-      new blueprints.CalicoAddOn,
-      new blueprints.KedaAddOn,
-      new blueprints.CalicoAddOn,
-      new blueprints.MetricsServerAddOn,
-      new blueprints.ClusterAutoScalerAddOn,
-      new blueprints.ContainerInsightsAddOn,
-      new blueprints.AwsLoadBalancerControllerAddOn(),
-      new blueprints.XrayAddOn()
-    )
+    .addOns(...addOns)
     .teams(new TeamPlatform(account), new TeamApplication('backend',account));
   
     blueprints.CodePipelineStack.builder()
