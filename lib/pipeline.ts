@@ -31,7 +31,7 @@ export default class PipelineConstruct extends Construct {
 
     const bootstrapRepo : blueprints.ApplicationRepository = {
         repoUrl,
-        targetRevision: 'trunk',
+        targetRevision: 'main',
     }
 
     // HERE WE GENERATE THE ADDON CONFIGURATIONS
