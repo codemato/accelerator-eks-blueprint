@@ -1,13 +1,35 @@
 // lib/pipeline.ts
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as blueprints from '@aws-quickstart/eks-blueprints';
+import { CapacityType, KubernetesVersion, NodegroupAmiType } from 'aws-cdk-lib/aws-eks';
+import { InstanceType } from 'aws-cdk-lib/aws-ec2';
 import { TeamPlatform, TeamApplication } from '../teams'; // HERE WE IMPORT TEAMS
 
 export default class PipelineConstruct extends Construct {
   constructor(scope: Construct, id: string, props?: cdk.StackProps){
     super(scope,id)
-
+    const clusterProvider = new blueprints.GenericClusterProvider({
+        version: KubernetesVersion.V1_21,
+        managedNodeGroups: [
+            {
+                id: "mng1",
+                amiType: NodegroupAmiType.AL2_X86_64,
+                instanceTypes: [new InstanceType('m5.2xlarge')],
+                diskSize: 25,
+                nodeGroupSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }
+            },
+            {
+                id: "mng2",
+                amiType: NodegroupAmiType.AL2_X86_64,
+                instanceTypes: [new InstanceType('m5.2xlarge')],
+                diskSize: 25,
+                nodeGroupSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }
+            },
+        ]
+    });
+               
     const account = props?.env?.account!;
     const region = props?.env?.region!;
     const addOns: Array<blueprints.ClusterAddOn> = [
@@ -19,12 +41,14 @@ export default class PipelineConstruct extends Construct {
         new blueprints.KedaAddOn(),
         new blueprints.XrayAddOn(),
         new blueprints.AwsForFluentBitAddOn(),
-
+        new blueprints.EbsCsiDriverAddOn(),
+        new blueprints.EfsCsiDriverAddOn({replicaCount: 1}),
     ];
     const blueprint = blueprints.EksBlueprint.builder()
     .account(account)
     .region(region)
     .addOns(...addOns)
+    .clusterProvider(clusterProvider)
     .teams(new TeamPlatform(account), new TeamApplication('backend',account));
     // HERE WE ADD THE ARGOCD APP OF APPS REPO INFORMATION
     const repoUrl = 'https://github.com/codemato/eks-argo-workloads.git';
