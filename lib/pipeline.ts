@@ -90,7 +90,7 @@ export default class PipelineConstruct extends Construct {
       .owner("codemato")
       .repository({
           repoUrl: 'accelerator-eks-blueprint',
-          credentialsSecretName: 'acc-github-token',
+          credentialsSecretName: 'accelerator-github-token',
           targetRevision: 'main'
       })
       // WE ADD THE STAGES IN WAVE FROM THE PREVIOUS CODE
