@@ -5,6 +5,8 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as blueprints from '@aws-quickstart/eks-blueprints';
 import { CapacityType, KubernetesVersion, NodegroupAmiType } from 'aws-cdk-lib/aws-eks';
 import { InstanceType } from 'aws-cdk-lib/aws-ec2';
+import { IstioBaseAddOn } from '../lib/istio-base';
+import { IstioControlPlaneAddOn } from '../lib/istio-control-plane';
 import { TeamPlatform, TeamApplication } from '../teams'; // HERE WE IMPORT TEAMS
 
 export default class PipelineConstruct extends Construct {
@@ -36,7 +38,26 @@ export default class PipelineConstruct extends Construct {
             },
         ]
     });
-               
+    
+    const istioControlPlaneAddOnProps = {
+      values: {
+        pilot: {
+          autoscaleEnabled: true,
+          autoscaleMin: 1,
+          autoscaleMax: 5,
+          replicaCount: 1,
+          rollingMaxSurge: "100%",
+          rollingMaxUnavailable: "25%",
+          resources: {
+            requests: {
+              cpu: "500m",
+              memory: "2048Mi",
+            }
+          }
+        }
+      }
+    }      
+    
     const account = props?.env?.account!;
     const region = props?.env?.region!;
     const addOns: Array<blueprints.ClusterAddOn> = [
@@ -50,6 +71,8 @@ export default class PipelineConstruct extends Construct {
         new blueprints.AwsForFluentBitAddOn(),
         new blueprints.EbsCsiDriverAddOn(),
         new blueprints.EfsCsiDriverAddOn({replicaCount: 1}),
+        new IstioBaseAddOn(),
+        new IstioControlPlaneAddOn(istioControlPlaneAddOnProps)
     ];
     const blueprint = blueprints.EksBlueprint.builder()
     .account(account)
