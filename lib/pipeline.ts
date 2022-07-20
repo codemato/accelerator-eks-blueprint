@@ -27,6 +27,13 @@ export default class PipelineConstruct extends Construct {
                 diskSize: 25,
                 nodeGroupSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }
             },
+            {
+                id: "mng3",
+                amiType: NodegroupAmiType.AL2_X86_64,
+                instanceTypes: [new InstanceType('m5.2xlarge')],
+                diskSize: 25,
+                nodeGroupSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }
+            },
         ]
     });
                
